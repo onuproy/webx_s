@@ -1,20 +1,46 @@
-!(function () {
-    $.fn.bgscroll = $.fn.bgScroll = function (options) {
+!(function ($) {
+    $.fn.bgscroll = function (options) {
         if (!this.length) return this;
-        options || (options = {}), window.scrollElements || (window.scrollElements = {});
-        for (var i = 0; i < this.length; i++) {
-            for (var allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", randomId = "", l = 0; l < 5; l++) randomId += allowedChars.charAt(Math.floor(Math.random() * allowedChars.length));
-            (this[i].current = 0),
-                (this[i].scrollSpeed = options.scrollSpeed ? options.scrollSpeed : 70),
-                (this[i].direction = options.direction ? options.direction : "h"),
-                (window.scrollElements[randomId] = this[i]),
-                eval(
-                    "window[randomId]=function(){var axis=0;var e=window.scrollElements." +
-                        randomId +
-                        ';e.current -= 1;if (e.direction == "h") axis ="0" - e.current + "px 0";else if (e.direction == "v") axis = "0 " + e.current + "px";else if (e.direction == "d") axis = e.current + "px " + e.current + "px";$( e ).css("background-position", axis);}'
-                ),
-                setInterval("window." + randomId + "()", options.scrollSpeed ? options.scrollSpeed : 70);
-        }
+
+        options = options || {};
+        window.scrollElements = window.scrollElements || {};
+
+        this.each(function () {
+            let allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                randomId = "",
+                element = this;
+
+            for (let i = 0; i < 5; i++) {
+                randomId += allowedChars.charAt(Math.floor(Math.random() * allowedChars.length));
+            }
+
+            element.current = 0;
+            element.scrollSpeed = options.scrollSpeed || 70;
+            element.direction = options.direction || "h"; // "h" (horizontal), "v" (vertical), "up", "down"
+
+            window.scrollElements[randomId] = element;
+
+            window[randomId] = function () {
+                let e = window.scrollElements[randomId];
+                
+                if (e.direction === "h") {
+                    e.current -= 1;
+                    $(e).css("background-position", `${-e.current}px 0`);
+                } else if (e.direction === "v") {
+                    e.current -= 1;
+                    $(e).css("background-position", `0 ${e.current}px`);
+                } else if (e.direction === "up") {
+                    e.current += 1; // Moves background UP
+                    $(e).css("background-position", `0 -${e.current}px`);
+                } else if (e.direction === "down") {
+                    e.current += 1; // Moves background DOWN ✅
+                    $(e).css("background-position", `0 ${e.current}px`);
+                }
+            };
+
+            setInterval(window[randomId], element.scrollSpeed);
+        });
+
         return this;
     };
 })(jQuery);
